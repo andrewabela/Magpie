@@ -1,0 +1,26 @@
+CREATE TABLE IF NOT EXISTS Note (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+    edited_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+);
+
+listNotes:
+SELECT id, title, content
+FROM Note
+ORDER BY edited_at DESC
+LIMIT :limit OFFSET :offset;
+
+insertNote:
+INSERT INTO Note (title, content)
+VALUES (:title, :content);
+
+updateContent:
+UPDATE Note
+SET content = :content, edited_at = strftime('%s', 'now')
+WHERE id = :id;
+
+deleteNoteById:
+DELETE FROM Note
+WHERE id = :id;
