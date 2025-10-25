@@ -34,7 +34,7 @@ class Faker : StorageAbstract() {
 
                 isFavorite = lambda@{
                     println("Checking if note $index is favorite")
-                    return@lambda false
+                    return@lambda kotlin.random.Random.nextBoolean()
                 },
 
                 setFavorite = { favorite: Boolean ->
