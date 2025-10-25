@@ -5,5 +5,7 @@ data class Note(
     val getTitle: () -> String,
     val getContent: () -> String,
     val editContent: (content: String) -> Unit,
+    val isFavorite: () -> Boolean = { false },
+    val setFavorite: (favorite: Boolean) -> Unit = {},
     val rm: () -> Unit
 )

@@ -28,6 +28,12 @@ class LocalDB(context: Context) : StorageAbstract() {
                 editContent = { content ->
                     database.setupdbQueries.updateContent(content, dbNote.id)
                 },
+
+                isFavorite = { dbNote.is_favorite != 0L },
+
+                setFavorite = { favorite ->
+                    database.setupdbQueries.updateFavorite(if (favorite) 1L else 0L, dbNote.id)
+                },
                 rm = { database.setupdbQueries.deleteNoteById(dbNote.id) }
             )
         }
@@ -37,4 +43,5 @@ class LocalDB(context: Context) : StorageAbstract() {
     override fun createNote(note: Note) {
         database.setupdbQueries.insertNote(note.getTitle(), note.getContent())
     }
+
 }
