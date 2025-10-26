@@ -26,6 +26,7 @@ import page.newlevel.notes.storage.Note
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,7 +44,9 @@ private fun AppContent() {
     MaterialTheme{
         Surface {
             MainScreen()
+
         }
     }
 }
+
 

@@ -12,58 +12,173 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.shape.RoundedCornerShape
 import page.newlevel.notes.storage.Note
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.clickable
 import androidx.compose.ui.viewinterop.AndroidView
 import page.newlevel.magpie.R
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.asPaddingValues
+import android.graphics.drawable.GradientDrawable
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.only
+
+val lexendDeca = FontFamily(
+    Font(R.font.lexend_deca_extralight, androidx.compose.ui.text.font.FontWeight.ExtraLight),
+    Font(R.font.lexend_deca_light, androidx.compose.ui.text.font.FontWeight.Light),
+    Font(R.font.lexend_deca_normal, androidx.compose.ui.text.font.FontWeight.Normal),
+    Font(R.font.lexend_deca_medium, androidx.compose.ui.text.font.FontWeight.Medium),
+    Font(R.font.lexend_deca_semibold, androidx.compose.ui.text.font.FontWeight.SemiBold)
+)
 
 @Composable
 internal fun MainScreen() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize(),
-        contentAlignment = Alignment.TopCenter
-    ) {
-
-        Column(
-            modifier = Modifier.verticalScroll(rememberScrollState()).systemBarsPadding()
+    Scaffold(
+        bottomBar = {
+            ActionButtons()
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(colorResource(R.color.notes_bg)),
+            contentAlignment = Alignment.TopCenter
         ) {
-            Greeting(name = "Android ${android.os.Build.VERSION.RELEASE} (API ${android.os.Build.VERSION.SDK_INT})")
-            NotesListScreen()
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()).padding(WindowInsets.systemBars.only(WindowInsetsSides.Top).asPaddingValues()).padding(bottom = paddingValues.calculateBottomPadding())
+            ) {
+                Greeting(name = "Android ${android.os.Build.VERSION.RELEASE} (API ${android.os.Build.VERSION.SDK_INT})")
+                NotesListScreen()
+            }
         }
     }
 }
 
-
 @Composable
 private fun Greeting(name: String) {
-    Text(text = "Hello $name!")
+    Column {
+        Text(
+            text = "Hello,",
+            fontFamily = lexendDeca,
+            fontSize = 54.sp,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.Normal,
+            color = colorResource(R.color.notes_foreground_text)
+        )
+        Text(
+            text = "$name!",
+            fontFamily = lexendDeca,
+            fontSize = 36.sp,
+            lineHeight = 40.sp,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+            color = colorResource(R.color.notes_foreground_text)
+        )
+    }
+}
+
+@Composable
+private fun ActionButtons() {
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+    AndroidView(
+        factory = { ctx ->
+            android.widget.LinearLayout(ctx).apply {
+                orientation = android.widget.LinearLayout.HORIZONTAL
+                val newBtn = android.widget.ImageView(ctx).apply {
+                    setPadding(55, 55, 55, 55)
+                    setImageResource( R.drawable.add)
+                    setBackground(GradientDrawable().apply {
+                        shape = GradientDrawable.OVAL
+                        setColor(ctx.getColor(R.color.action_bar_main_btn_bg))
+                    })
+                }
+                val checkListBtn = android.widget.ImageView(ctx).apply {
+                    setPadding(55, 55, 55, 55)
+                    setImageResource( R.drawable.check_box)
+                    setBackground(GradientDrawable().apply {
+                        shape = GradientDrawable.OVAL
+                        setColor(ctx.getColor(R.color.action_bar_secondary_btn_bg))
+                    })
+                    layoutParams = android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+                        setMargins(8, 0, 8, 0)
+                    }
+                }
+                val voiceBtn = android.widget.ImageView(ctx).apply {
+                    setPadding(55, 55, 55, 55)
+                    setImageResource( R.drawable.mic_alt )
+                    setBackground(GradientDrawable().apply {
+                        shape = GradientDrawable.OVAL
+                        setColor(ctx.getColor(R.color.action_bar_secondary_btn_bg))
+                    })
+
+                }
+                addView(newBtn)
+                addView(checkListBtn)
+                addView(voiceBtn)
+            }
+        },
+        modifier = Modifier
+            .padding(start = 10.dp, top = 10.dp, end = 10.dp, bottom = androidx.compose.foundation.layout.WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 10.dp)
+            .background(
+                color = colorResource(R.color.action_bar_FAB_bg),
+                shape = CircleShape
+            )
+    )
+    }
 }
 
 @Composable
 private fun Note(note: Note, modifier: Modifier = Modifier) {
     Card(
-        modifier = modifier.padding(1.dp).height(215.dp),
-        shape = RoundedCornerShape(38.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Blue)
+        modifier = modifier.padding(2.dp).height(190.dp),
+        shape = RoundedCornerShape(34.dp, 34.dp, 17.dp, 34.dp),
+        colors = CardDefaults.cardColors(containerColor = colorResource(
+            when (kotlin.math.abs(note.hashCode()) % 9) {
+                0 -> R.color.notes_card_bg_0
+                1 -> R.color.notes_card_bg_1
+                2 -> R.color.notes_card_bg_2
+                3 -> R.color.notes_card_bg_3
+                4 -> R.color.notes_card_bg_4
+                5 -> R.color.notes_card_bg_5
+                6 -> R.color.notes_card_bg_6
+                7 -> R.color.notes_card_bg_7
+                8 -> R.color.notes_card_bg_8
+                else -> R.color.black
+            }
+        ))
     ) {
         FavoriteBtn(
             note = note
         )
-        Text(text = "Note id: ${note.uuid}, title: ${note.getTitle()}")
+        Text(
+            text = "${note.getTitle()}",
+            fontFamily = lexendDeca,
+            fontSize = 25.sp,
+            lineHeight = 30.sp,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
+            modifier = Modifier.padding(10.dp, 0.dp, 5.dp, 0.dp),
+        )
     }
 }
 
@@ -72,7 +187,7 @@ private fun NotesListScreen() {
     val (allNotes, _) = page.newlevel.magpie.storage.Faker().listNotes(0, 100)
 
     Column (
-        modifier = Modifier.padding(1.dp)
+        modifier = Modifier.padding(2.dp)
     ) {
         allNotes.chunked(2).forEach { pair ->
             Row {
@@ -92,21 +207,26 @@ private fun FavoriteBtn(note: Note) {
     }
     val isFavorite = isFavoriteState.value
 
-        AndroidView(
-            factory = { ctx ->
-                android.widget.ImageView(ctx).apply {
-                    setPadding(32, 32, 32, 32)
-                    val fav = isFavoriteState.value
-                    setImageResource(if (fav) R.drawable.heart_empty else R.drawable.heart_smile)
-                    setOnClickListener {
-                        val newValue = !isFavoriteState.value
-                        note.setFavorite(newValue)
-                        isFavoriteState.value = newValue
-                        setImageResource(if (newValue) R.drawable.heart_empty else R.drawable.heart_smile)
-                    }
+    AndroidView(
+        factory = { ctx ->
+            android.widget.ImageView(ctx).apply {
+                val fav = isFavoriteState.value
+                setPadding(if (fav) 28 else 90, 31, if (fav) 90 else 28, 25)
+                setImageResource(if (fav) R.drawable.heart_empty else R.drawable.heart_smile)
+                setOnClickListener {
+                    val newValue = !isFavoriteState.value
+                    note.setFavorite(newValue)
+                    isFavoriteState.value = newValue
+                    setImageResource(if (newValue) R.drawable.heart_empty else R.drawable.heart_smile)
+                    setPadding(if (newValue) 28 else 90, 31, if (newValue) 90 else 28, 25)
                 }
-            },
-            modifier = Modifier
-                .padding(4.dp)
-        )
+            }
+        },
+        modifier = Modifier
+            .padding(10.dp, 10.dp, 10.dp, 0.dp)
+            .background(
+                color = colorResource(R.color.semi_transparent),
+                shape = CircleShape
+            )
+    )
 }
