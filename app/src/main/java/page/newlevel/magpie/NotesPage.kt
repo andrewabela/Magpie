@@ -1,5 +1,6 @@
 package page.newlevel.magpie
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -39,6 +40,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.asPaddingValues
 import android.graphics.drawable.GradientDrawable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.only
@@ -50,6 +52,7 @@ val lexendDeca = FontFamily(
     Font(R.font.lexend_deca_medium, androidx.compose.ui.text.font.FontWeight.Medium),
     Font(R.font.lexend_deca_semibold, androidx.compose.ui.text.font.FontWeight.SemiBold)
 )
+private val storage = page.newlevel.magpie.storage.Faker()
 
 @Composable
 internal fun MainScreen() {
@@ -67,6 +70,7 @@ internal fun MainScreen() {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()).padding(WindowInsets.systemBars.only(WindowInsetsSides.Top).asPaddingValues()).padding(bottom = paddingValues.calculateBottomPadding())
             ) {
+                SettingsBtn()
                 Greeting(name = "Android ${android.os.Build.VERSION.RELEASE} (API ${android.os.Build.VERSION.SDK_INT})")
                 NotesListScreen()
             }
@@ -112,6 +116,7 @@ private fun ActionButtons() {
                         shape = GradientDrawable.OVAL
                         setColor(ctx.getColor(R.color.action_bar_main_btn_bg))
                     })
+                    setOnClickListener { newNote(ctx) }
                 }
                 val checkListBtn = android.widget.ImageView(ctx).apply {
                     setPadding(55, 55, 55, 55)
@@ -148,10 +153,30 @@ private fun ActionButtons() {
     }
 }
 
+private fun newNote(context: android.content.Context) {
+    var newNote = storage.createNote()
+    openNote(
+        note = newNote,
+        context = context
+    )
+}
+
+private fun openNote(note: Note, context: android.content.Context) {
+    val intent = android.content.Intent(context, page.newlevel.magpie.NotePage::class.java)
+    NotePage.currentNote = note
+    context.startActivity(intent)
+}
+
 @Composable
 private fun Note(note: Note, modifier: Modifier = Modifier) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     Card(
-        modifier = modifier.padding(2.dp).height(190.dp),
+        modifier = modifier.padding(2.dp).height(190.dp).clickable {
+            openNote(
+                note = note,
+                context = context
+            )
+        },
         shape = RoundedCornerShape(34.dp, 34.dp, 17.dp, 34.dp),
         colors = CardDefaults.cardColors(containerColor = colorResource(
             when (kotlin.math.abs(note.hashCode()) % 9) {
@@ -184,7 +209,7 @@ private fun Note(note: Note, modifier: Modifier = Modifier) {
 
 @Composable
 private fun NotesListScreen() {
-    val (allNotes, _) = page.newlevel.magpie.storage.Faker().listNotes(0, 100)
+    val (allNotes, _) = storage.listNotes(0, 100)
 
     Column (
         modifier = Modifier.padding(2.dp)
@@ -229,4 +254,29 @@ private fun FavoriteBtn(note: Note) {
                 shape = CircleShape
             )
     )
+}
+
+@Composable
+private fun SettingsBtn() {
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.TopEnd
+    ) {
+        AndroidView(
+            factory = { ctx ->
+                android.widget.ImageView(ctx).apply {
+                    setPadding(34, 34, 34, 34)
+                    setImageResource( R.drawable.settings )
+                    setBackground(GradientDrawable().apply {
+                        shape = GradientDrawable.OVAL
+                        setColor(ctx.getColor(R.color.settings_btn_icon_bg))
+                    })
+                    setOnClickListener {
+
+                    }
+                }
+                },
+                modifier = Modifier.padding(10.dp)
+        )
+    }
 }

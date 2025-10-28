@@ -7,5 +7,8 @@ abstract class StorageAbstract {
         limit: Int
     ): Pair<List<Note>, Boolean>
 
-    abstract fun createNote(note: Note)
+    abstract fun createNote(): Note
+
+//    abstract fun getNote(uuid: String): Note
+
 }

@@ -1,10 +1,11 @@
 package page.newlevel.magpie.storage
+import page.newlevel.notes.storage.Note
 import page.newlevel.notes.storage.StorageAbstract
 
 class Faker : StorageAbstract() {
     // Hardcoded dummy data for testing purposes
     private val dummyNotes = listOf(
-        "Note one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty" to "Content of Note one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty",
+        "Note one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty" to "Content of Note one two three four five six seven eight nine ten\neleven twelve thirteen fourteen fifteen sixteen seventeen\neighteen\nnineteen\n\ntwenty",
         "Note 2" to "Content of Note 2",
         "Note 3" to "Content of Note 3",
         "Note 4" to "Content of Note 4",
@@ -55,8 +56,20 @@ class Faker : StorageAbstract() {
         return Pair(notes, hasMore)
     }
 
-    override fun createNote(note: page.newlevel.notes.storage.Note) {
-        // No-op for faker
+    override fun createNote(): Note {
+        val note : Note = Note(
+            uuid = "new-note-uuid",
+            getTitle = { "New" },
+            getContent = { "Aa Bb Cc Dd 1 2 3 4" },
+            editContent = { content: String ->
+                println("Editing content of new note to: $content")
+            },
+            rm = {
+                println("Removing new note")
+            }
+        )
+        println("Creating note: $note")
+        return note
     }
 
 

@@ -40,8 +40,8 @@ class LocalDB(context: Context) : StorageAbstract() {
         return Pair(notesToReturn, hasMore)
     }
 
-    override fun createNote(note: Note) {
-        database.setupdbQueries.insertNote(note.getTitle(), note.getContent())
+    override fun createNote(): Note {
+        throw NotImplementedError()
     }
 
 }
