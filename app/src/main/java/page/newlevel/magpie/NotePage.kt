@@ -4,39 +4,32 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import page.newlevel.magpie.ui.theme.MagpieTheme
 import page.newlevel.notes.storage.Note
-
-
-//val lexendDeca = FontFamily(
-//    Font(R.font.lexend_deca_extralight, androidx.compose.ui.text.font.FontWeight.ExtraLight),
-//    Font(R.font.lexend_deca_light, androidx.compose.ui.text.font.FontWeight.Light),
-//    Font(R.font.lexend_deca_normal, androidx.compose.ui.text.font.FontWeight.Normal),
-//    Font(R.font.lexend_deca_medium, androidx.compose.ui.text.font.FontWeight.Medium),
-//    Font(R.font.lexend_deca_semibold, androidx.compose.ui.text.font.FontWeight.SemiBold)
-//)
-
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsTopHeight
+import androidx.compose.foundation.layout.Spacer
 
 class NotePage : ComponentActivity() {
     companion object {
@@ -64,39 +57,60 @@ class NotePage : ComponentActivity() {
 
 @Composable
 internal fun NoteMainScreen(note: Note, modifier: Modifier = Modifier) {
-    val title = note.getTitle()
-    val tldr = note.getTLDR()
-    val body = note.getContent()
-    Column {
-        Column(
+    val titleState = remember { mutableStateOf(note.getTitle()) }
+    val bodyState = remember { mutableStateOf(note.getContent()) }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .imePadding()
+            .verticalScroll(rememberScrollState())
+    ) {
+        Spacer(modifier = Modifier.windowInsetsTopHeight(WindowInsets.statusBars))
+        Row(
             modifier = Modifier
-                .fillMaxSize()
-                .systemBarsPadding()
-                .verticalScroll(rememberScrollState())
+                .fillMaxWidth()
+                .padding(top = 4.dp, start = 16.dp, end = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-        BackBtn()
-            // Title
+            BackBtn()
+            // add padding around the favorite button
+            FavoriteBtn(note = note, modifier = Modifier.padding(0.dp, 5.dp, 0.dp, 0.dp))
+        }
+        // Title
         BasicTextField(
-            value = title,
-            onValueChange = { /* Handle text change */ },
-            modifier = Modifier.padding(bottom = 20.dp),
-            textStyle = TextStyle(fontSize = 24.sp)
+            value = titleState.value,
+            onValueChange = { newValue ->
+                titleState.value = newValue
+                note.editTitle(newValue)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, bottom = 20.dp),
+            textStyle = TextStyle(
+                fontFamily = lexendDeca,
+                fontSize = 36.sp,
+                lineHeight = 40.sp,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold
+            )
         )
-            //TLDR
-        Text(
-            text = tldr,
-            fontSize = 16.sp,
-            modifier = Modifier.padding(bottom = 28.dp)
-        )
-            // Content
+        // Content
         BasicTextField(
-            value = body,
-            onValueChange = { /* Handle text change */ },
-            textStyle = TextStyle(fontSize = 12.sp),
-            modifier = Modifier.fillMaxSize()
+            value = bodyState.value,
+            onValueChange = { newValue ->
+                bodyState.value = newValue
+                note.editContent(newValue)
+            },
+            textStyle = TextStyle(
+                fontFamily = lexendDeca,
+                fontSize = 22.sp,
+                lineHeight = 28.sp,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Light
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, bottom = 32.dp)
         )
     }
-}
 }
 
 @Composable

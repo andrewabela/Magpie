@@ -19,7 +19,7 @@
     <color name="action_bar_secondary_btn_bg">#B0FFFFFF</color>
     <color name="settings_btn_icon_bg">#20FFFFFF</color>
 <!--  Note Page  -->
-    <color name="note_page_bg">#FFF5EDC9</color>
-    <color name="back_btn_icon_bg">#FFDFD6B7</color>
+    <color name="note_page_bg">#FFC7BAA9</color>
+    <color name="back_btn_icon_bg">#FFA89D8F</color>
 
 </resources>

@@ -10,12 +10,22 @@ CREATE TABLE IF NOT EXISTS Note (
 listNotes:
 SELECT id, title, content, is_favorite
 FROM Note
-ORDER BY edited_at DESC
+ORDER BY is_favorite DESC, edited_at DESC
 LIMIT :limit OFFSET :offset;
 
 insertNote:
 INSERT INTO Note (title, content)
 VALUES (:title, :content);
+
+getLastInsertedNote:
+SELECT id, title, content, is_favorite
+FROM Note
+WHERE id = last_insert_rowid();
+
+getNoteById:
+SELECT id, title, content, is_favorite
+FROM Note
+WHERE id = :id;
 
 updateContent:
 UPDATE Note
@@ -29,4 +39,9 @@ WHERE id = :id;
 
 deleteNoteById:
 DELETE FROM Note
+WHERE id = :id;
+
+updateTitle:
+UPDATE Note
+SET title = :title, edited_at = strftime('%s', 'now')
 WHERE id = :id;

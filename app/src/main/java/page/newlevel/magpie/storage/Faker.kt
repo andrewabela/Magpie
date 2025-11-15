@@ -1,6 +1,9 @@
 package page.newlevel.magpie.storage
 import page.newlevel.notes.storage.Note
 import page.newlevel.notes.storage.StorageAbstract
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class Faker : StorageAbstract() {
     // Hardcoded dummy data for testing purposes
@@ -57,9 +60,10 @@ class Faker : StorageAbstract() {
     }
 
     override fun createNote(): Note {
+        val title = SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault()).format(Date())
         val note : Note = Note(
             uuid = "new-note-uuid",
-            getTitle = { "New" },
+            getTitle = { title },
             getContent = { "Aa Bb Cc Dd 1 2 3 4" },
             editContent = { content: String ->
                 println("Editing content of new note to: $content")

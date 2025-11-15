@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Magpie</string>
     <string name="title_activity_note_page">NotePage</string>
+    <string name="settings_title">Settings</string>
 </resources>
