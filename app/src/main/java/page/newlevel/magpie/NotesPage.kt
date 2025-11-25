@@ -40,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.fragment.app.FragmentActivity
 
 val lexendDeca = FontFamily(
     Font(R.font.lexend_deca_extralight, androidx.compose.ui.text.font.FontWeight.ExtraLight),
@@ -332,7 +333,7 @@ private fun SettingsBtn() {
                         setColor(ctx.getColor(R.color.settings_btn_icon_bg))
                         setCornerRadius(ctx.resources.displayMetrics.widthPixels / 4f)
                     })
-                    setOnClickListener { }
+                    setOnClickListener { SettingsActivity().show((ctx as FragmentActivity).supportFragmentManager, "settings") }
 
                     val iconView = android.widget.ImageView(ctx).apply {
                         setImageResource(R.drawable.settings)
@@ -364,3 +365,4 @@ private fun SettingsBtn() {
         )
     }
 }
+

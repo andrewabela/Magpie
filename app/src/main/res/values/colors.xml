@@ -17,9 +17,13 @@
     <color name="action_bar_FAB_bg">#55FFFFFF</color>
     <color name="action_bar_main_btn_bg">#FF000000</color>
     <color name="action_bar_secondary_btn_bg">#B0FFFFFF</color>
-    <color name="settings_btn_icon_bg">#20FFFFFF</color>
+    <color name="settings_btn_icon_bg">#FF36313d</color>
 <!--  Note Page  -->
     <color name="note_page_bg">#FFC7BAA9</color>
     <color name="back_btn_icon_bg">#FFA89D8F</color>
+<!--    Settings Page-->
+    <color name="settings_bg">#FF36313d</color>
+    <color name="safe_setting_btn_bg">#FF222921</color>
+    <color name="danger_setting_btn_bg">#FF2b2120</color>
 
 </resources>
