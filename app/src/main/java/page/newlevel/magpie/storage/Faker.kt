@@ -76,5 +76,27 @@ class Faker : StorageAbstract() {
         return note
     }
 
+    override fun exportAllNotes(): String {
+        val jsonArray = org.json.JSONArray()
+        for ((title, content) in dummyNotes) {
+            val noteObj = org.json.JSONObject()
+            noteObj.put("title", title)
+            noteObj.put("content", content)
+            noteObj.put("is_favorite", 0)
+            jsonArray.put(noteObj)
+        }
+        return jsonArray.toString(2)
+    }
+
+    override fun importNotes(jsonData: String): Int {
+        val jsonArray = org.json.JSONArray(jsonData)
+        println("Importing ${jsonArray.length()} notes")
+        return jsonArray.length()
+    }
+
+    override fun deleteAllNotes(): Int {
+        println("Deleting all notes")
+        return dummyNotes.size
+    }
 
 }

@@ -45,3 +45,12 @@ updateTitle:
 UPDATE Note
 SET title = :title, edited_at = strftime('%s', 'now')
 WHERE id = :id;
+
+getAllNotes:
+SELECT id, title, content, is_favorite, created_at, edited_at
+FROM Note
+ORDER BY is_favorite DESC, edited_at DESC;
+
+deleteAllNotes:
+DELETE FROM Note;
+

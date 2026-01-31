@@ -78,4 +78,58 @@ class LocalDB(context: Context) : StorageAbstract() {
         )
     }
 
+    override fun exportAllNotes(): String {
+        val allNotes = database.setupdbQueries.getAllNotes().executeAsList()
+        val jsonArray = org.json.JSONArray()
+
+        for (note in allNotes) {
+            val noteObj = org.json.JSONObject()
+            noteObj.put("title", note.title)
+            noteObj.put("content", note.content)
+            noteObj.put("is_favorite", note.is_favorite)
+            noteObj.put("created_at", note.created_at)
+            noteObj.put("edited_at", note.edited_at)
+            jsonArray.put(noteObj)
+        }
+
+        return jsonArray.toString(2)
+    }
+
+    override fun importNotes(jsonData: String): Int {
+        val jsonArray = org.json.JSONArray(jsonData)
+        var count = 0
+
+        for (i in 0 until jsonArray.length()) {
+            try {
+                val noteObj = jsonArray.getJSONObject(i)
+                val title = noteObj.getString("title")
+                val content = noteObj.getString("content")
+                val isFavorite = noteObj.optLong("is_favorite", 0L)
+
+                // Insert note
+                database.setupdbQueries.insertNote(title, content)
+
+                // Update favorite status if needed
+                if (isFavorite != 0L) {
+                    val lastNote = database.setupdbQueries.getLastInsertedNote().executeAsOne()
+                    database.setupdbQueries.updateFavorite(isFavorite, lastNote.id)
+                }
+
+                count++
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // Continue with next note even if one fails
+            }
+        }
+
+        return count
+    }
+
+    override fun deleteAllNotes(): Int {
+        val (notes, _) = listNotes(0, Int.MAX_VALUE)
+        val count = notes.size
+        database.setupdbQueries.deleteAllNotes()
+        return count
+    }
+
 }

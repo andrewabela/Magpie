@@ -36,8 +36,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.fragment.app.FragmentActivity
@@ -56,7 +57,7 @@ internal fun MainScreen() {
     val storage = page.newlevel.magpie.storage.LocalDB(context)
 
     // State to trigger recomposition when activity resumes
-    var refreshKey by remember { mutableStateOf(0) }
+    var refreshKey by remember { mutableIntStateOf(0) }
 
     // Observe lifecycle to refresh notes when returning to this screen
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -73,6 +74,11 @@ internal fun MainScreen() {
         }
     }
 
+    // Get user name from SharedPreferences, updating on refresh
+    val userName = remember(refreshKey) {
+        SettingsActivity.getUserName(context)
+    }
+
     Scaffold(
         bottomBar = {
             ActionButtons(storage)
@@ -87,7 +93,7 @@ internal fun MainScreen() {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()).padding(WindowInsets.systemBars.only(WindowInsetsSides.Top).asPaddingValues()).padding(bottom = paddingValues.calculateBottomPadding())
             ) {
-                Greeting(name = "Android ${android.os.Build.VERSION.RELEASE} (API ${android.os.Build.VERSION.SDK_INT})")
+                Greeting(name = userName)
                 NotesListScreen(storage, refreshKey)
                 SettingsBtn()
             }
@@ -96,7 +102,13 @@ internal fun MainScreen() {
 }
 
 @Composable
-private fun Greeting(name: String) {
+private fun Greeting(name: String?) {
+    val greetingText = if (name.isNullOrBlank()) {
+        "Android ${android.os.Build.VERSION.RELEASE} (API ${android.os.Build.VERSION.SDK_INT})"
+    } else {
+        name
+    }
+
     Column {
         Text(
             text = "Hello,",
@@ -106,7 +118,7 @@ private fun Greeting(name: String) {
             color = colorResource(R.color.notes_foreground_text)
         )
         Text(
-            text = "$name!",
+            text = "$greetingText!",
             fontFamily = lexendDeca,
             fontSize = 36.sp,
             lineHeight = 40.sp,
@@ -293,7 +305,7 @@ private fun DeleteNoteDialog(
 
 @Composable
 private fun NotesListScreen(storage: page.newlevel.notes.storage.StorageAbstract, refreshKey: Int) {
-    var localRefreshKey by remember { mutableStateOf(0) }
+    var localRefreshKey by remember { androidx.compose.runtime.mutableIntStateOf(0) }
 
     val (allNotes, _) = remember(refreshKey, localRefreshKey) {
         storage.listNotes(0, 100)
@@ -305,11 +317,11 @@ private fun NotesListScreen(storage: page.newlevel.notes.storage.StorageAbstract
         allNotes.chunked(2).forEach { pair ->
             Row {
                 pair.forEach { note ->
-                            Note(
-                                note = note,
-                                modifier = Modifier.weight(1f),
-                                onNoteDeleted = { localRefreshKey++ }
-                            )
+                    Note(
+                        note = note,
+                        modifier = Modifier.weight(1f),
+                        onNoteDeleted = { localRefreshKey++ }
+                    )
                 }
             }
         }
@@ -333,7 +345,7 @@ private fun SettingsBtn() {
                         setColor(ctx.getColor(R.color.settings_btn_icon_bg))
                         setCornerRadius(ctx.resources.displayMetrics.widthPixels / 4f)
                     })
-                    setOnClickListener { SettingsActivity().show((ctx as FragmentActivity).supportFragmentManager, "settings") }
+                    setOnClickListener { ctx.startActivity(android.content.Intent(ctx, SettingsActivity::class.java)) }
 
                     val iconView = android.widget.ImageView(ctx).apply {
                         setImageResource(R.drawable.settings)
@@ -365,4 +377,3 @@ private fun SettingsBtn() {
         )
     }
 }
-
