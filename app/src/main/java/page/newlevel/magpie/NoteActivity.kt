@@ -84,8 +84,10 @@ internal fun NoteMainScreen(note: Note, modifier: Modifier = Modifier) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 BackBtn()
-                // add padding around the favorite button
-                FavoriteBtn(note = note, modifier = Modifier.padding(0.dp, 5.dp, 0.dp, 0.dp))
+                Row {
+                    FavoriteBtn(note = note, modifier = Modifier.padding(0.dp, 5.dp, 0.dp, 0.dp))
+                    ShareBtn(note = note, modifier = Modifier.padding(0.dp, 5.dp, 0.dp, 0.dp))
+                }
             }
             // Title
             BasicTextField(
@@ -115,13 +117,20 @@ internal fun NoteMainScreen(note: Note, modifier: Modifier = Modifier) {
                     is UrlObj -> "url_${chunk.url.value}_$index"
                 }
             }
-        ) { _, chunk ->
+        ) { index, chunk ->
             when (chunk) {
                 is TextObj -> {
                     BasicTextField(
                         value = chunk.text.value,
                         onValueChange = { newValue: String ->
-                            chunk.text.value = newValue
+                            // If this chunk directly follows a URL, it must keep its
+                            // leading line break so typed text isn't ingested into the URL
+                            val followsUrl = chunksState.value.getOrNull(index - 1) is UrlObj
+                            chunk.text.value = if (followsUrl && !newValue.startsWith("\n")) {
+                                "\n$newValue"
+                            } else {
+                                newValue
+                            }
                             val fullText = chunksState.value.joinToString("") {
                                 when (it) {
                                     is TextObj -> it.text.value
@@ -168,16 +177,22 @@ internal fun NoteMainScreen(note: Note, modifier: Modifier = Modifier) {
 }
 
 private fun splitTextAndUrls(text: String, existingChunks: List<TextOrUrl> = emptyList()): List<TextOrUrl> {
-    val regex = "(https?://[\\w./?=&%-]+)".toRegex()
+    val regex = "(https?://(?:(?!https?://)[\\w./?=&%-])+)".toRegex()
     val chunks = mutableListOf<TextOrUrl>()
     val matches = regex.findAll(text).toList()
     var lastIndex = 0
     var existingIndex = 0
 
-    matches.forEach { match ->
+    matches.forEachIndexed { matchIndex, match ->
         // Text before match
         if (match.range.first > lastIndex) {
-            val startText = text.substring(lastIndex, match.range.first)
+            var startText = text.substring(lastIndex, match.range.first)
+
+            // If this text immediately follows a previous URL, ensure it starts
+            // with a line break so it doesn't get re-absorbed into that URL
+            if (matchIndex > 0 && !startText.startsWith("\n")) {
+                startText = "\n$startText"
+            }
 
             // Try to reuse existing TextObj if the content is the same
             val existingTextObj = existingChunks.getOrNull(existingIndex) as? TextObj
@@ -185,6 +200,16 @@ private fun splitTextAndUrls(text: String, existingChunks: List<TextOrUrl> = emp
                 chunks.add(existingTextObj)
             } else {
                 chunks.add(TextObj(mutableStateOf(startText)))
+            }
+            existingIndex++
+        } else if (matchIndex > 0) {
+            // Two URLs with nothing between them - insert a line break so the
+            // user has a place to type that won't be absorbed into either URL
+            val existingTextObj = existingChunks.getOrNull(existingIndex) as? TextObj
+            if (existingTextObj != null && existingTextObj.text.value == "\n") {
+                chunks.add(existingTextObj)
+            } else {
+                chunks.add(TextObj(mutableStateOf("\n")))
             }
             existingIndex++
         }
@@ -205,7 +230,13 @@ private fun splitTextAndUrls(text: String, existingChunks: List<TextOrUrl> = emp
 
     // Remaining text
     if (lastIndex < text.length) {
-        val endText = text.substring(lastIndex)
+        var endText = text.substring(lastIndex)
+
+        // If this text immediately follows a URL, ensure it starts with a line
+        // break so it doesn't get re-absorbed into that URL
+        if (matches.isNotEmpty() && !endText.startsWith("\n")) {
+            endText = "\n$endText"
+        }
 
         // Try to reuse existing TextObj if the content is the same
         val existingTextObj = existingChunks.getOrNull(existingIndex) as? TextObj
@@ -228,10 +259,10 @@ private fun splitTextAndUrls(text: String, existingChunks: List<TextOrUrl> = emp
         chunks.add(0, TextObj(mutableStateOf("")))
     }
 
-    // If the last chunk is a URL, add an empty text at the end for typing
+    // If the last chunk is a URL, add a text chunk starting with a line break
+    // at the end so the user has a place to type that won't be absorbed into the URL
     if (chunks.isNotEmpty() && chunks.last() is UrlObj) {
-        // Try to reuse existing empty text at the end
-            chunks.add(TextObj(mutableStateOf("")))
+        chunks.add(TextObj(mutableStateOf("\n")))
     }
 
     return chunks
